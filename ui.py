@@ -5,15 +5,17 @@ Created on Sun Feb 14 16:29:29 2021
 
 @author: cecilia
 """
-import os
+import subprocess
 import tkinter as tk
 
 window = tk.Tk()
 window.wm_attributes('-fullscreen','true')
 
-firefox = "/usr/lib/libreoffice/program/./scalc"
+def startfile():
+    firefox = "/usr/lib/libreoffice/program/scalc"
+    subprocess.Popen([firefox])
 
-tk.Button(window, text="Open", command=os.open(firefox,  os.O_RDONLY)).pack()
+tk.Button(window, text="Open", command=startfile).pack()
 
 tk.Button(window, text="Quit", command=window.destroy).pack()
 
