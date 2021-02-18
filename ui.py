@@ -1,58 +1,86 @@
+
+# Filename: ui.py
+
+__version__ = '0.1'
+__author__ = 'Alessio Deidda / Cecilia Baggini'
+
+import sys
 import subprocess
-import tkinter as tk
-
-## main window ##########################################
-window = tk.Tk()
-window.wm_attributes('-fullscreen','true')
-window.geometry('2x2')
-
-window.columnconfigure(0, weight=3)
-window.columnconfigure(1, weight=1)
-
-
-# style
-bg_image = tk.PhotoImage(file='imgs/main_bg.gif')
-window_bg = tk.Label(window, image = bg_image) 
-window_bg.place(x = 0, y = 0, relwidth = 1, relheight = 1) 
-window_bg.configure(bg='black')
-
-
+from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton
+# import styles
+import style
 
 ## App launcher functions ##############################
 # Navit
-def startfile():
+def startNavit():
     app = "/usr/bin/navit"
     subprocess.Popen([app])
     
 # Reverse camera
-def run():
+def startCam():
     # -fs -> fullscreen
     # tv: -> source path
     subprocess.run(["mplayer", "-fs", "tv:///dev/video0"])
-    
 
-## Buttons ############################################
-# Quit
-img_quit = tk.PhotoImage(file='imgs/quit-icon.gif')
-#lab_quit = tk.Label(image=img_quit)
-btn_quit = tk.Button(window, command=window.destroy, image = img_quit, borderwidth=0, highlightbackground='black', highlightthickness=0)
-btn_quit.grid(row=0, column=0)
-#btn_quit.pack()
-#lab_quit.pack(pady=20)
+# Create a subclass of QMainWindow to setup the GUI
+class Navigator(QMainWindow):
 
-#Navit
-img_navit = tk.PhotoImage(file='imgs/location-icon.gif')
-btn_navit = tk.Button(window, command=startfile, image = img_navit, highlightbackground='black', highlightthickness=0)
+    def _createButtons(self):
+        ## Buttons ############################################
+        buttonsLayout = QGridLayout()
+        # Navit
+        btn_navit = QPushButton()
+        btn_navit.setStyleSheet(style.btn_navit) # -> to style variable style.btn_navit
+        btn_navit.clicked.connect(startNavit)
+        buttonsLayout.addWidget(btn_navit, 1, 0)
 
-btn_navit.grid(row=0, column=1)
-#btn_navit.pack()
+        # Camera
+        btn_camera = QPushButton()
+        btn_camera.setStyleSheet(style.btn_camera) # -> to style variable style.btn_camera
+        btn_camera.clicked.connect(startCam)
+        buttonsLayout.addWidget(btn_camera, 1, 1)
 
-# Reverse camera
-img_camera = tk.PhotoImage(file='imgs/camera-icon.gif')
-btn_camera = tk.Button(window, command=run, image = img_camera, highlightbackground='black', highlightthickness=0)
+        # Sensors
+        btn_sensors = QPushButton()
+        btn_sensors.setStyleSheet(style.btn_sensors) # -> to style variable style.btn_sensors
+        buttonsLayout.addWidget(btn_sensors, 1, 2)
 
-btn_camera.grid(row=0, column=2)
-#btn_camera.pack()
+        # Quit
+        btn_quit = QPushButton()
+        btn_quit.setStyleSheet(style.btn_quit) # -> to style variable style.btn_quit
+        btn_quit.clicked.connect(self.close)
+        buttonsLayout.addWidget(btn_quit, 2, 0, 2, 3)
+
+        # Add buttonsLayout to the general layout
+        self.generalLayout.addLayout(buttonsLayout)
 
 
-window.mainloop() 
+    ## root window
+    def __init__(self):
+        super().__init__()
+        # Set some main window's properties
+        self.setWindowTitle('Navigator')
+        self.setFixedSize(635, 635)
+        self.setStyleSheet(style.mainWindow) # -> to style variable style.mainWindow
+        # self.showFullScreen()
+        # Set the central widget
+        self.generalLayout = QVBoxLayout()
+        self._centralWidget = QWidget(self)
+        self.setCentralWidget(self._centralWidget)
+        self._centralWidget.setLayout(self.generalLayout)
+        # Create the display and the buttons
+        # self._createDisplay()
+        self._createButtons()
+
+
+# Client code
+def main():
+    # Create an instance of QApplication
+    navigator = QApplication(sys.argv)
+    view = Navigator()
+    view.show()
+    sys.exit(navigator.exec_())
+
+if __name__ == '__main__':
+    main()
