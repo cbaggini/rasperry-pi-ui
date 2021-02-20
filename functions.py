@@ -11,7 +11,7 @@ def startNavit():
     app = '/usr/bin/navit'
     subprocess.Popen([app])
     
-# Reverse camera
+# Reverse camera / execute a terminal command with subprocess
 def startCam():
     # -fs -> fullscreen
     # tv: -> source path

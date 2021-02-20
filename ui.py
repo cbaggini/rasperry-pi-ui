@@ -5,12 +5,17 @@ __version__ = '0.1'
 __author__ = 'Alessio Deidda / Cecilia Baggini'
 
 import sys
-
-from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton
+#import mpylayer
 # import styles
 import style
 import functions
+
+from PyQt5.QtCore import QDir, Qt, QUrl
+from PyQt5.QtGui import QIcon, QPalette
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QFileDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QAction, QSizePolicy, QSlider, QStyle
 
 
 ## Create a subclasses of QMainWindow to setup the GUI
@@ -19,18 +24,117 @@ class CameraWindow(QWidget):
     
     def __init__(self):
         super().__init__()
-        layout = QGridLayout()
-        
-        self.label = QLabel('Camera Window')
-        self.button = QPushButton('quit')
-        self.button.clicked.connect(self.close)
+
+        self.setWindowTitle('camera')
         self.setFixedSize(635, 635)
-        layout.addWidget(self.label)
-        layout.addWidget(self.button)
-        self.setLayout(layout)
+
+        p = self.palette()
+        p.setColor(QPalette.Window, Qt.black)
+        self.setPalette(p)
+        self.init_ui()
+        self.show()
+
+    def init_ui(self):
+
+        #create media player object
+        self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+
+        #create videowidget object
+        videowidget = QVideoWidget()
+
+        #create open button
+        openBtn = QPushButton('Open Video')
+        openBtn.clicked.connect(self.open_file)
+
+        #create button for playing
+        #self.playBtn = QPushButton()
+        #self.playBtn.setEnabled(False)
+        #self.playBtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+        #self.playBtn.clicked.connect(self.play_video)
+
+        #create slider
+        #self.slider = QSlider(Qt.Horizontal)
+        #self.slider.setRange(0,0)
+        #self.slider.sliderMoved.connect(self.set_position)
+
+        #create label
+        self.label = QLabel()
+        self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+
+        #create close button
+        closeBtn = QPushButton('quit')
+        closeBtn.clicked.connect(self.close)
         
+        #create hbox layout
+        hboxLayout = QHBoxLayout()
+        hboxLayout.setContentsMargins(0,0,0,0)
+
+        #set widgets to the hbox layout
+        hboxLayout.addWidget(openBtn)
+        hboxLayout.addWidget(closeBtn)
+        #hboxLayout.addWidget(self.playBtn)
+        #hboxLayout.addWidget(self.slider)
+
+        #create vbox layout
+        vboxLayout = QVBoxLayout()
+        vboxLayout.addWidget(videowidget)
+        vboxLayout.addLayout(hboxLayout)
+        vboxLayout.addWidget(self.label)
+
+        self.setLayout(vboxLayout)
+        self.mediaPlayer.setVideoOutput(videowidget)
+        #media player signals
+
+        self.mediaPlayer.stateChanged.connect(self.mediastate_changed)
+        #self.mediaPlayer.positionChanged.connect(self.position_changed)
+        #self.mediaPlayer.durationChanged.connect(self.duration_changed)
 
 
+    def open_file(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
+
+        if filename != '':
+            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(filename)))
+            self.playBtn.setEnabled(True)
+
+
+    def play_video(self):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.mediaPlayer.pause()
+
+        else:
+            self.mediaPlayer.play()
+
+
+    def mediastate_changed(self, state):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.playBtn.setIcon(
+                self.style().standardIcon(QStyle.SP_MediaPause)
+
+            )
+
+        else:
+            self.playBtn.setIcon(
+                self.style().standardIcon(QStyle.SP_MediaPlay)
+
+            )
+
+    #def position_changed(self, position):
+    #    self.slider.setValue(position)
+
+
+    #def duration_changed(self, duration):
+    #    self.slider.setRange(0, duration)
+
+
+    def set_position(self, position):
+        self.mediaPlayer.setPosition(position)
+
+
+    def handle_errors(self):
+        self.playBtn.setEnabled(False)
+        self.label.setText("Error: " + self.mediaPlayer.errorString())
+        
 
 # Main window
 class Navigator(QMainWindow):
@@ -90,7 +194,6 @@ class Navigator(QMainWindow):
     def camera_window(self, checked):
             self.w = CameraWindow()
             self.w.show()
-
         
 
 # Client code
