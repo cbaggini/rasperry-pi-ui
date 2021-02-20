@@ -10,4 +10,4 @@ btn_navit = 'QPushButton { height: 64px; width: 64px; border: none; background: 
 btn_camera = 'QPushButton { height: 64px; width: 64px; border: none; background: url("imgs/camera-icon.png") center no-repeat; }'
 btn_sensors = 'QPushButton { height: 64px; width: 64px; border: none; background: url("imgs/quit-icon.png") center no-repeat; }'
 
-# set common style ?
+### NOTES: set a common style when required, maybe a string variable that can be attached
