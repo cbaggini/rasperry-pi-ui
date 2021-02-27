@@ -9,43 +9,33 @@ import sys
 # import styles
 import style
 import functions
-
-from PyQt5.QtCore import QDir, Qt, QUrl
-from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtCore import QCoreApplication
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5 import QtCore, QtGui, QtWidgets
-import sys
 import cv2
-from threading import Thread, Lock
 import time
-from PyQt5.QtWidgets import QApplication, QHBoxLayout, QFileDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QAction, QSizePolicy, QSlider, QStyle
+from threading import Thread, Lock
+
+# PyQt5 packages
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtCore import QTimer, Qt, QRect, QCoreApplication, QMetaObject
+from PyQt5.QtGui import QImage, QPixmap, QPalette
+from PyQt5.QtWidgets import QApplication, QHBoxLayout, QDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QSizePolicy
 
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(972, 667)
-        self.pushButton = QtWidgets.QPushButton(Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(20, 630, 451, 28))
+        self.pushButton = QPushButton(Dialog)
+        self.pushButton.setGeometry(QRect(20, 630, 451, 28))
         self.pushButton.setObjectName("pushButton")
-        #self.pushButton_2 = QtWidgets.QPushButton(Dialog)
-        #self.pushButton_2.setGeometry(QtCore.QRect(500, 630, 451, 28))
-        #self.pushButton_2.setObjectName("pushButton_2")
-        self.label = QtWidgets.QLabel(Dialog)
-        self.label.setGeometry(QtCore.QRect(24, 19, 931, 591))
+        self.label = QLabel(Dialog)
+        self.label.setGeometry(QRect(24, 19, 931, 591))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
-
         self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        QMetaObject.connectSlotsByName(Dialog)
 
     def retranslateUi(self, Dialog):
-        _translate = QtCore.QCoreApplication.translate
+        _translate = QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.pushButton.setText(_translate("Dialog", "Start Stream"))
         #self.pushButton_2.setText(_translate("Dialog", "Record"))
@@ -97,7 +87,7 @@ class WebcamVideoStream :
 
 ## Create a subclasses of QMainWindow to setup the GUI
 # camera window
-class CameraWindow(QtWidgets.QDialog, Ui_Dialog):
+class CameraWindow(QDialog, Ui_Dialog):
     
     def __init__(self):
         super().__init__()
@@ -113,13 +103,9 @@ class CameraWindow(QtWidgets.QDialog, Ui_Dialog):
 
     def init_ui(self):
 
-        #create media player object
-        self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
         #create videowidget object
         videowidget = QVideoWidget()
 
-        
         #create label
         self.label = QLabel()
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
@@ -151,7 +137,7 @@ class CameraWindow(QtWidgets.QDialog, Ui_Dialog):
     def start_cam(self):
         self.capture = WebcamVideoStream(src = 0).start()
         self.timer=QTimer(self)
-        self.timer.setTimerType(QtCore.Qt.PreciseTimer)
+        self.timer.setTimerType(Qt.PreciseTimer)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(2)
 
