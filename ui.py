@@ -15,12 +15,89 @@ from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtCore import QCoreApplication
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+import cv2
+from threading import Thread, Lock
+import time
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QFileDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QAction, QSizePolicy, QSlider, QStyle
 
 
+class Ui_Dialog(object):
+    def setupUi(self, Dialog):
+        Dialog.setObjectName("Dialog")
+        Dialog.resize(972, 667)
+        self.pushButton = QtWidgets.QPushButton(Dialog)
+        self.pushButton.setGeometry(QtCore.QRect(20, 630, 451, 28))
+        self.pushButton.setObjectName("pushButton")
+        #self.pushButton_2 = QtWidgets.QPushButton(Dialog)
+        #self.pushButton_2.setGeometry(QtCore.QRect(500, 630, 451, 28))
+        #self.pushButton_2.setObjectName("pushButton_2")
+        self.label = QtWidgets.QLabel(Dialog)
+        self.label.setGeometry(QtCore.QRect(24, 19, 931, 591))
+        self.label.setScaledContents(True)
+        self.label.setObjectName("label")
+
+        self.retranslateUi(Dialog)
+        QtCore.QMetaObject.connectSlotsByName(Dialog)
+
+    def retranslateUi(self, Dialog):
+        _translate = QtCore.QCoreApplication.translate
+        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        self.pushButton.setText(_translate("Dialog", "Start Stream"))
+        #self.pushButton_2.setText(_translate("Dialog", "Record"))
+
+# ------------
+
+class WebcamVideoStream :
+    def __init__(self, src, width = 640, height = 480) :
+        self.stream = cv2.VideoCapture(src)
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+        self.stream.set(cv2.CAP_PROP_BUFFERSIZE, 5)
+        self.FPS = 1/30
+        self.FPS_MS = int(self.FPS * 1000)
+        (self.grabbed, self.frame) = self.stream.read()
+        self.started = False
+        self.read_lock = Lock()
+
+    def start(self) :
+        if self.started :
+            return None
+        self.started = True
+        self.thread = Thread(target=self.update, args=())
+        self.thread.daemon = True
+        self.thread.start()
+        return self
+
+    def update(self) :
+        while self.started :
+            (grabbed, frame) = self.stream.read()
+            time.sleep(self.FPS)
+            self.read_lock.acquire()
+            self.grabbed, self.frame = grabbed, frame
+            self.read_lock.release()
+
+    def read(self) :
+        self.read_lock.acquire()
+        frame = self.frame.copy()
+        self.read_lock.release()
+        return frame
+
+    def stop(self) :
+        self.started = False
+        if self.thread.is_alive():
+            self.thread.join()
+
+    def __exit__(self, exc_type, exc_value, traceback) :
+        self.stream.release()
+
 ## Create a subclasses of QMainWindow to setup the GUI
 # camera window
-class CameraWindow(QWidget):
+class CameraWindow(QtWidgets.QDialog, Ui_Dialog):
     
     def __init__(self):
         super().__init__()
@@ -42,21 +119,7 @@ class CameraWindow(QWidget):
         #create videowidget object
         videowidget = QVideoWidget()
 
-        #create open button
-        openBtn = QPushButton('Open Video')
-        openBtn.clicked.connect(self.open_file)
-
-        #create button for playing
-        #self.playBtn = QPushButton()
-        #self.playBtn.setEnabled(False)
-        #self.playBtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-        #self.playBtn.clicked.connect(self.play_video)
-
-        #create slider
-        #self.slider = QSlider(Qt.Horizontal)
-        #self.slider.setRange(0,0)
-        #self.slider.sliderMoved.connect(self.set_position)
-
+        
         #create label
         self.label = QLabel()
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
@@ -64,6 +127,9 @@ class CameraWindow(QWidget):
         #create close button
         closeBtn = QPushButton('quit')
         closeBtn.clicked.connect(self.close)
+
+        openBtn = QPushButton('open')
+        openBtn.clicked.connect(self.start_cam)
         
         #create hbox layout
         hboxLayout = QHBoxLayout()
@@ -72,9 +138,7 @@ class CameraWindow(QWidget):
         #set widgets to the hbox layout
         hboxLayout.addWidget(openBtn)
         hboxLayout.addWidget(closeBtn)
-        #hboxLayout.addWidget(self.playBtn)
-        #hboxLayout.addWidget(self.slider)
-
+        
         #create vbox layout
         vboxLayout = QVBoxLayout()
         vboxLayout.addWidget(videowidget)
@@ -82,58 +146,37 @@ class CameraWindow(QWidget):
         vboxLayout.addWidget(self.label)
 
         self.setLayout(vboxLayout)
-        self.mediaPlayer.setVideoOutput(videowidget)
         #media player signals
 
-        self.mediaPlayer.stateChanged.connect(self.mediastate_changed)
-        #self.mediaPlayer.positionChanged.connect(self.position_changed)
-        #self.mediaPlayer.durationChanged.connect(self.duration_changed)
+    def start_cam(self):
+        self.capture = WebcamVideoStream(src = 0).start()
+        self.timer=QTimer(self)
+        self.timer.setTimerType(QtCore.Qt.PreciseTimer)
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(2)
+
+    def update_frame(self):
+        self.image=self.capture.read()
+        self.displayImage(self.image)
+
+    def displayImage(self,img):
+        qformat=QImage.Format_Indexed8
+        if len(img.shape)==3:
+            if img.shape[2]==4:
+                qformat=QImage.Format_RGBA8888
+            else:
+                qformat=QImage.Format_RGB888
+
+        outImage=QImage(img,img.shape[1],img.shape[0],img.strides[0],qformat)
+        outImage=outImage.rgbSwapped()
+
+        self.label.setPixmap(QPixmap.fromImage(outImage))
+        self.label.setScaledContents(True)
+        return outImage
+        
 
 
-    def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
 
-        if filename != '':
-            self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(filename)))
-            self.playBtn.setEnabled(True)
-
-
-    def play_video(self):
-        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            self.mediaPlayer.pause()
-
-        else:
-            self.mediaPlayer.play()
-
-
-    def mediastate_changed(self, state):
-        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            self.playBtn.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPause)
-
-            )
-
-        else:
-            self.playBtn.setIcon(
-                self.style().standardIcon(QStyle.SP_MediaPlay)
-
-            )
-
-    #def position_changed(self, position):
-    #    self.slider.setValue(position)
-
-
-    #def duration_changed(self, duration):
-    #    self.slider.setRange(0, duration)
-
-
-    def set_position(self, position):
-        self.mediaPlayer.setPosition(position)
-
-
-    def handle_errors(self):
-        self.playBtn.setEnabled(False)
-        self.label.setText("Error: " + self.mediaPlayer.errorString())
         
 
 # Main window
