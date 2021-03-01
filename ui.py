@@ -100,6 +100,7 @@ class CameraWindow(QDialog, Ui_Dialog):
         self.setPalette(p)
         self.init_ui()
         self.show()
+        #self.start_cam() call function on widget creation
 
     def init_ui(self):
 
@@ -111,28 +112,18 @@ class CameraWindow(QDialog, Ui_Dialog):
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
         #create close button
-        closeBtn = QPushButton('quit')
-        closeBtn.clicked.connect(self.close)
+        btn_back = QPushButton()
+        btn_back.setStyleSheet(style.btn_back)
+        btn_back.clicked.connect(self.close)
+        #btn_back.clicked.connect(self.stop_camera)
 
-        openBtn = QPushButton('open')
-        openBtn.clicked.connect(self.start_cam)
-        
-        #create hbox layout
-        hboxLayout = QHBoxLayout()
-        hboxLayout.setContentsMargins(0,0,0,0)
+        #create layout
+        cameraLayout = QGridLayout()
+        cameraLayout.addWidget(videowidget, 0, 0)
+        cameraLayout.addWidget(btn_back, 2, 0)
+        cameraLayout.addWidget(self.label, 1, 0)
 
-        #set widgets to the hbox layout
-        hboxLayout.addWidget(openBtn)
-        hboxLayout.addWidget(closeBtn)
-        
-        #create vbox layout
-        vboxLayout = QVBoxLayout()
-        vboxLayout.addWidget(videowidget)
-        vboxLayout.addLayout(hboxLayout)
-        vboxLayout.addWidget(self.label)
-
-        self.setLayout(vboxLayout)
-        #media player signals
+        self.setLayout(cameraLayout)
 
     def start_cam(self):
         self.capture = WebcamVideoStream(src = 0).start()
@@ -141,6 +132,10 @@ class CameraWindow(QDialog, Ui_Dialog):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(2)
 
+    # on mac camera still streaming on window closed
+    def stop_camera(self, capture):
+        capture.release()
+        
     def update_frame(self):
         self.image=self.capture.read()
         self.displayImage(self.image)
@@ -162,46 +157,40 @@ class CameraWindow(QDialog, Ui_Dialog):
         
 
 
-
         
 
 # Main window
 class Navigator(QMainWindow):
 
     def _createButtons(self):
-        ## Buttons ############################################
-        mainLayout = QGridLayout()
+        
         # Navit
         btn_navit = QPushButton()
         btn_navit.setStyleSheet(style.btn_navit) # -> to style variable style.btn_navit
         btn_navit.clicked.connect(functions.startNavit)
-        mainLayout.addWidget(btn_navit, 1, 0)
-
+        
         # Camera
         btn_camera = QPushButton()
         btn_camera.setStyleSheet(style.btn_camera) # -> to style variable style.btn_camera
-        btn_camera.clicked.connect(functions.startCam)
-        mainLayout.addWidget(btn_camera, 1, 1)
-
+        btn_camera.clicked.connect(self.camera_window)
+        
         # Sensors
         btn_sensors = QPushButton()
         btn_sensors.setStyleSheet(style.btn_sensors) # -> to style variable style.btn_sensors
-        mainLayout.addWidget(btn_sensors, 1, 2)
-
+       
         # Quit
         btn_quit = QPushButton()
         btn_quit.setStyleSheet(style.btn_quit) # -> to style variable style.btn_quit
         btn_quit.clicked.connect(self.close)
-        mainLayout.addWidget(btn_quit, 2, 0, 2, 3)
-
-        btn_new = QPushButton('Camera window')
-        #btn_new.setStyleSheet(style.btn_quit) # -> to style variable style.btn_quit
-        btn_new.clicked.connect(self.camera_window)
-        mainLayout.addWidget(btn_new, 3, 0, 2, 3)
-
+        
         # Add buttonsLayout to the general layout
-        self.generalLayout.addLayout(mainLayout)
+        mainLayout = QGridLayout()
+        mainLayout.addWidget(btn_navit, 1, 0)
+        mainLayout.addWidget(btn_camera, 1, 1)
+        mainLayout.addWidget(btn_sensors, 1, 2)
+        mainLayout.addWidget(btn_quit, 2, 0, 2, 3) # (row, column, rows, columns)
 
+        self.generalLayout.addLayout(mainLayout)
 
     ## root window
     def __init__(self):
@@ -223,6 +212,7 @@ class Navigator(QMainWindow):
     def camera_window(self, checked):
             self.w = CameraWindow()
             self.w.show()
+            self.w.start_cam()
         
 
 # Client code

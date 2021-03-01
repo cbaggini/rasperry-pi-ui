@@ -11,8 +11,8 @@ def startNavit():
     app = '/usr/bin/navit'
     subprocess.Popen([app])
     
-# Reverse camera / execute a terminal command with subprocess
-def startCam():
+# dash camera, set mplayer to write a file in cycle
+def dashCam():
     # -fs -> fullscreen
     # tv: -> source path
     subprocess.run(['mplayer', '-fs', 'tv:///dev/video0'])
