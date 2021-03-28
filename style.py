@@ -3,7 +3,7 @@
 __version__ = '0.1'
 __author__ = 'Alessio Deidda / Cecilia Baggini'
 
-mainWindow = 'QMainWindow { background: url("imgs/main_bg.gif") center no-repeat; }'
+mainWindow = 'QMainWindow { background: #000 url("imgs/main_bg.gif") center no-repeat; }'
 
 btn_quit = 'QPushButton { height: 64px; width: 64px; border: none; background: url("imgs/quit-icon.png") center no-repeat; }'
 btn_navit = 'QPushButton { height: 64px; width: 64px; border: none; background: url("imgs/navit-icon.png") center no-repeat; }'
