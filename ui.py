@@ -32,7 +32,7 @@ class VideoStream(QThread):
                 FlippedImage = cv2.flip(Image, 1)
                 ConvertToQtFormat = QImage(
                     FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(1280, 720, Qt.KeepAspectRatio)
+                Pic = ConvertToQtFormat.scaled(480, 480, Qt.KeepAspectRatio)
                 self.ImageUpdate.emit(Pic)
 
     def stop(self):
@@ -51,10 +51,11 @@ class CameraWindow(QWidget):
 
         self.image_label = QLabel(self)
         self.image_label.showFullScreen()
-        #self.image_label.resize(635, 635)
+        #self.image_label.resize(580, 580)
+
 
         cLayout = QVBoxLayout()
-        cLayout.addWidget(self.image_label)
+        cLayout.addWidget(self.image_label, 0)
         camera_quit = QPushButton('quit camera')
         cLayout.addWidget(camera_quit, 1)
         camera_quit.clicked.connect(self.CancelFeed)
