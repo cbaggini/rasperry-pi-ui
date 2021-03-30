@@ -32,7 +32,7 @@ class VideoStream(QThread):
                 FlippedImage = cv2.flip(Image, 1)
                 ConvertToQtFormat = QImage(
                     FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(1280, 720, Qt.KeepAspectRatio)
+                Pic = ConvertToQtFormat.scaled(1024, 600, Qt.KeepAspectRatio)
                 self.ImageUpdate.emit(Pic)
 
     def stop(self):
@@ -46,8 +46,8 @@ class CameraWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle('camera')
-        self.setFixedSize(1280, 720)  # use variables
-        #self.showFullScreen()
+        #self.setFixedSize(1280, 720)  # use variables
+        self.showFullScreen()
         self.setStyleSheet(style.cameraWindow)
 
         self.image_label = QLabel(self)
@@ -114,8 +114,8 @@ class Navigator(QMainWindow):
         super().__init__()
         
         self.setWindowTitle('Navigator')
-        self.setFixedSize(1280, 720)
-        #self.showFullScreen()
+        #self.setFixedSize(1280, 720)
+        self.showFullScreen()
         self.setStyleSheet(style.mainWindow) # -> to style variable style.mainWindow
         
         self.generalLayout = QVBoxLayout()
