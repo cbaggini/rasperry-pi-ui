@@ -1,6 +1,6 @@
 # Filename: functions.py
 
-__version__ = '0.1'
+__version__ = '0.3'
 __author__ = 'Alessio Deidda / Cecilia Baggini'
 
 import subprocess
