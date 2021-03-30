@@ -32,7 +32,7 @@ class VideoStream(QThread):
                 FlippedImage = cv2.flip(Image, 1)
                 ConvertToQtFormat = QImage(
                     FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(1024, 600, Qt.KeepAspectRatio)
+                Pic = ConvertToQtFormat.scaled(1024, 512, Qt.KeepAspectRatio)
                 self.ImageUpdate.emit(Pic)
 
     def stop(self):
