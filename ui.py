@@ -32,7 +32,7 @@ class VideoStream(QThread):
                 FlippedImage = cv2.flip(Image, 1)
                 ConvertToQtFormat = QImage(
                     FlippedImage.data, FlippedImage.shape[1], FlippedImage.shape[0], QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(480, 480, Qt.KeepAspectRatio)
+                Pic = ConvertToQtFormat.scaled(1280, 720, Qt.KeepAspectRatio)
                 self.ImageUpdate.emit(Pic)
 
     def stop(self):
@@ -46,17 +46,19 @@ class CameraWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle('camera')
-        #self.setFixedSize(635, 635)  # use variables
-        self.showFullScreen()
+        self.setFixedSize(1280, 720)  # use variables
+        #self.showFullScreen()
+        self.setStyleSheet(style.cameraWindow)
 
         self.image_label = QLabel(self)
-        self.image_label.showFullScreen()
-        #self.image_label.resize(580, 580)
-
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         cLayout = QVBoxLayout()
+        
         cLayout.addWidget(self.image_label, 0)
-        camera_quit = QPushButton('quit camera')
+        camera_quit = QPushButton()
+        camera_quit.setStyleSheet(style.btn_back)
         cLayout.addWidget(camera_quit, 1)
         camera_quit.clicked.connect(self.CancelFeed)
         camera_quit.clicked.connect(self.close)
@@ -110,17 +112,17 @@ class Navigator(QMainWindow):
     ## root window
     def __init__(self):
         super().__init__()
-        # Set some main window's properties
+        
         self.setWindowTitle('Navigator')
-        #self.setFixedSize(635, 635)
-        self.showFullScreen()
+        self.setFixedSize(1280, 720)
+        #self.showFullScreen()
         self.setStyleSheet(style.mainWindow) # -> to style variable style.mainWindow
-        # Set the central widget
+        
         self.generalLayout = QVBoxLayout()
         self._centralWidget = QWidget(self)
         self.setCentralWidget(self._centralWidget)
         self._centralWidget.setLayout(self.generalLayout)
-        # Create the display and the buttons
+        
         #self._createDisplay()
         self._createButtons()
 
@@ -130,7 +132,7 @@ class Navigator(QMainWindow):
         
 #######################################################################
 def main():
-    # Create an instance of QApplication
+    
     navigator = QApplication(sys.argv)
     view = Navigator()
     view.show()
