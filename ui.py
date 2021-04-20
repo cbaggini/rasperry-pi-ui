@@ -67,7 +67,6 @@ class MediaPlayer(QWidget):
         self.setLayout(mLayout)
 
 
-
 #######################################################################
 class CameraWindow(QWidget):
 
@@ -180,4 +179,4 @@ if __name__ == '__main__':
     main()
 
 
-### NOTES: split files into Functions, Styles. Gorup layouts by window
+### NOTES: split files into Functions, Styles. Group layouts by window
