@@ -5,6 +5,7 @@ __version__ = '0.3'
 __author__ = 'Alessio Deidda / Cecilia Baggini'
 
 import sys
+import os
 #import mpylayer
 # import styles
 import style
@@ -12,7 +13,7 @@ import functions
 import cv2
 
 # PyQt5 packages
-from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtMultimedia import QMediaPlaylist, QMediaPlayer, QMediaContent
 from PyQt5.QtCore import QTimer, Qt, QRect, QCoreApplication, QMetaObject, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPalette
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QSizePolicy
@@ -39,6 +40,34 @@ class VideoStream(QThread):
         self.ThreadActive = False
         self.wait()
 
+
+#######################################################################
+class MediaPlayer(QWidget):
+
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('media player')
+        self.setFixedSize(1280, 720)  # use variables
+        #self.showFullScreen()
+        self.setStyleSheet(style.cameraWindow)
+
+        self.image_label = QLabel(self)
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        mLayout = QVBoxLayout()
+        
+        mLayout.addWidget(self.image_label, 0)
+        media_quit = QPushButton()
+        media_quit.setStyleSheet(style.btn_back)
+        mLayout.addWidget(media_quit, 1)
+        media_quit.clicked.connect(self.close)
+
+        self.setLayout(mLayout)
+
+
+
 #######################################################################
 class CameraWindow(QWidget):
 
@@ -46,8 +75,8 @@ class CameraWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle('camera')
-        #self.setFixedSize(1280, 720)  # use variables
-        self.showFullScreen()
+        self.setFixedSize(1280, 720)  # use variables
+        #self.showFullScreen()
         self.setStyleSheet(style.cameraWindow)
 
         self.image_label = QLabel(self)
@@ -83,21 +112,22 @@ class Navigator(QMainWindow):
         
         # Navit
         btn_navit = QPushButton()
-        btn_navit.setStyleSheet(style.btn_navit) # -> to style variable style.btn_navit
+        btn_navit.setStyleSheet(style.btn_navit)
         btn_navit.clicked.connect(functions.startNavit)
         
         # Camera
         btn_camera = QPushButton()
-        btn_camera.setStyleSheet(style.btn_camera) # -> to style variable style.btn_camera
+        btn_camera.setStyleSheet(style.btn_camera)
         btn_camera.clicked.connect(self.camera_window)
         
         # Sensors
         btn_sensors = QPushButton()
-        btn_sensors.setStyleSheet(style.btn_sensors) # -> to style variable style.btn_sensors
-       
+        btn_sensors.setStyleSheet(style.btn_sensors)
+        btn_sensors.clicked.connect(self.media_player)
+
         # Quit
         btn_quit = QPushButton()
-        btn_quit.setStyleSheet(style.btn_quit) # -> to style variable style.btn_quit
+        btn_quit.setStyleSheet(style.btn_quit)
         btn_quit.clicked.connect(self.close)
         
         # Add buttonsLayout to the general layout
@@ -105,7 +135,7 @@ class Navigator(QMainWindow):
         mainLayout.addWidget(btn_navit, 1, 0)
         mainLayout.addWidget(btn_camera, 1, 1)
         mainLayout.addWidget(btn_sensors, 1, 2)
-        mainLayout.addWidget(btn_quit, 2, 0, 2, 3) # (row, column, rows, columns)
+        mainLayout.addWidget(btn_quit, 2, 0, 2, 3)
 
         self.generalLayout.addLayout(mainLayout)
 
@@ -114,9 +144,9 @@ class Navigator(QMainWindow):
         super().__init__()
         
         self.setWindowTitle('Navigator')
-        #self.setFixedSize(1280, 720)
-        self.showFullScreen()
-        self.setStyleSheet(style.mainWindow) # -> to style variable style.mainWindow
+        self.setFixedSize(1280, 720)
+        #self.showFullScreen()
+        self.setStyleSheet(style.mainWindow)
         
         self.generalLayout = QVBoxLayout()
         self._centralWidget = QWidget(self)
@@ -129,6 +159,14 @@ class Navigator(QMainWindow):
     def camera_window(self, checked):
         self.w = CameraWindow()
         self.w.show()
+
+    def media_player(self, checked):
+        self.m = MediaPlayer()
+        self.m.show()
+
+    def Poweroff(channel):
+        os.system("sudo poweroff -h now")
+
         
 #######################################################################
 def main():
