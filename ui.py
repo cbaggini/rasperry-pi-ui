@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3.7
 # Filename: ui.py
 
 __version__ = '0.3'
@@ -13,7 +13,7 @@ import functions
 import cv2
 
 # PyQt5 packages
-from PyQt5.QtMultimedia import QMediaPlaylist, QMediaPlayer, QMediaContent
+
 from PyQt5.QtCore import QTimer, Qt, QRect, QCoreApplication, QMetaObject, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QPalette
 from PyQt5.QtWidgets import QApplication, QHBoxLayout, QDialog, QMainWindow, QLabel, QWidget, QVBoxLayout, QGridLayout, QPushButton, QSizePolicy
@@ -42,29 +42,7 @@ class VideoStream(QThread):
 
 
 #######################################################################
-class MediaPlayer(QWidget):
 
-    def __init__(self):
-        super().__init__()
-
-        self.setWindowTitle('media player')
-        self.setFixedSize(1280, 720)  # use variables
-        #self.showFullScreen()
-        self.setStyleSheet(style.cameraWindow)
-
-        self.image_label = QLabel(self)
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        mLayout = QVBoxLayout()
-        
-        mLayout.addWidget(self.image_label, 0)
-        media_quit = QPushButton()
-        media_quit.setStyleSheet(style.btn_back)
-        mLayout.addWidget(media_quit, 1)
-        media_quit.clicked.connect(self.close)
-
-        self.setLayout(mLayout)
 
 
 #######################################################################
@@ -122,7 +100,7 @@ class Navigator(QMainWindow):
         # Sensors
         btn_sensors = QPushButton()
         btn_sensors.setStyleSheet(style.btn_sensors)
-        btn_sensors.clicked.connect(self.media_player)
+        
 
         # Quit
         btn_quit = QPushButton()
@@ -158,10 +136,6 @@ class Navigator(QMainWindow):
     def camera_window(self, checked):
         self.w = CameraWindow()
         self.w.show()
-
-    def media_player(self, checked):
-        self.m = MediaPlayer()
-        self.m.show()
 
     def Poweroff(channel):
         os.system("sudo poweroff -h now")
