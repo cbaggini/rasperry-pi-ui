@@ -52,8 +52,8 @@ class CameraWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle('camera')
-        self.setFixedSize(1280, 720)  # use variables
-        #self.showFullScreen()
+        #self.setFixedSize(1280, 720)  # use variables
+        self.showFullScreen()
         self.setStyleSheet(style.cameraWindow)
 
         self.image_label = QLabel(self)
@@ -121,8 +121,8 @@ class Navigator(QMainWindow):
         super().__init__()
         
         self.setWindowTitle('Navigator')
-        self.setFixedSize(1280, 720)
-        #self.showFullScreen()
+        #self.setFixedSize(1280, 720)
+        self.showFullScreen()
         self.setStyleSheet(style.mainWindow)
         
         self.generalLayout = QVBoxLayout()
