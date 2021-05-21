@@ -102,18 +102,18 @@ class Navigator(QMainWindow):
         btn_sensors = QPushButton()
         btn_sensors.setStyleSheet(style.btn_sensors)
         
-
         # Quit
         btn_quit = QPushButton()
         btn_quit.setStyleSheet(style.btn_quit)
         btn_quit.clicked.connect(self.close)
         
         # Add buttonsLayout to the general layout
-        mainLayout = QGridLayout()
-        mainLayout.addWidget(btn_navit, 1, 0)
-        mainLayout.addWidget(btn_camera, 1, 1)
-        mainLayout.addWidget(btn_sensors, 1, 2)
-        mainLayout.addWidget(btn_quit, 2, 0, 2, 3)
+        mainLayout = QHBoxLayout()
+        
+        mainLayout.addWidget(btn_navit)
+        mainLayout.addWidget(btn_camera)
+        mainLayout.addWidget(btn_sensors)
+        mainLayout.addWidget(btn_quit)
 
         self.generalLayout.addLayout(mainLayout)
 
