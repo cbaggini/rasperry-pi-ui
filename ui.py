@@ -53,6 +53,7 @@ class CameraWindow(QWidget):
 
         self.setWindowTitle('camera')
         #self.setFixedSize(1280, 720)  # use variables
+        self.setCursor(Qt.BlankCursor)
         self.showFullScreen()
         self.setStyleSheet(style.cameraWindow)
 
@@ -122,6 +123,7 @@ class Navigator(QMainWindow):
         
         self.setWindowTitle('Navigator')
         #self.setFixedSize(1280, 720)
+        self.setCursor(Qt.BlankCursor) 
         self.showFullScreen()
         self.setStyleSheet(style.mainWindow)
         
